@@ -6,7 +6,7 @@
 //game constants:
 #define WINDOW_WIDTH 902
 #define WINDOW_HEIGHT 902
-#define CELL_WIDTH (30/1.5) //NOTE: the CELL_WIDTH should be chosen carefully as there shouldn't be half cells at the boundries
+#define CELL_WIDTH (30/1.5) //NOTE: the CELL_WIDTH should be chosen carefully
 #define GRID_THICKNESS 1
 
 
@@ -18,7 +18,7 @@
 
 
 
-  typedef struct {
+typedef struct {
     SDL_Window *global_window;
     SDL_Surface *global_surface;   //can be obtained from the global window itself
   float dt;

@@ -37,7 +37,7 @@ void close() {
 }
 
 /* //global variables */
-/* void (*init_ptr)(Plug *); */
+void (*init_ptr)(Plug *);
 void (*update_ptr)(Plug *);
 HMODULE plug_dll;
 
@@ -72,7 +72,7 @@ bool hot_reload() {
     CopyFile("../build/plug.dll", "../build/plug_temp.dll", FALSE);
     plug_dll = LoadLibrary("../build/plug_temp.dll");
 
-    /* init_ptr = (void (*)(Plug *))GetProcAddress(plug_dll, "init"); */
+    init_ptr = (void (*)(Plug *))GetProcAddress(plug_dll, "init");
 
     update_ptr = (void (*)(Plug *))GetProcAddress(plug_dll, "update");
 
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
 
   //variables:
   bool    quit           = false;
-
+  init_ptr(&plug);
 
   while(!quit) {
 
@@ -120,6 +120,7 @@ int main(int argc, char* argv[]) {
           quit = true;
         } else if(e.key.keysym.sym == SDLK_r) {
           hot_reload();
+          init_ptr(&plug);
         }
       }
     }
