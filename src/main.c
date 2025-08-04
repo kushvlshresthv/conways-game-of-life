@@ -49,6 +49,10 @@ void (*init_ptr)(Plug *);
 void (*update_ptr)(Plug *);
 void (*clear_grid_ptr)();
 void (*toggle_cell_state_ptr)(Plug *, int, int);
+void (*populate_grid_with_oscillators_ptr)();
+void (*populate_grid_with_glider_gun_ptr)();
+void (*populate_grid_with_random_cells_ptr)();
+
 HMODULE plug_dll;
 
 
@@ -91,6 +95,14 @@ bool hot_reload() {
 
     toggle_cell_state_ptr = (void (*)(Plug *, int, int))GetProcAddress(plug_dll, "toggle_cell_state");
 
+
+    populate_grid_with_glider_gun_ptr = (void (*)(void))GetProcAddress(plug_dll, "populate_grid_with_glider_gun");
+
+    populate_grid_with_oscillators_ptr = (void (*)(void))GetProcAddress(plug_dll, "populate_grid_with_oscillators");
+
+
+    populate_grid_with_random_cells_ptr = (void (*)(void))GetProcAddress(plug_dll, "populate_grid_with_random_cells");
+
     return true;
 }
 
@@ -117,8 +129,9 @@ int main(int argc, char* argv[]) {
 
   //variables:
   bool quit  = false;
-  bool pause = false;
+  bool pause = true;
   init_ptr(&plug);
+  next_frame();
 
   while(!quit) {
 
@@ -139,8 +152,11 @@ int main(int argc, char* argv[]) {
             break;
 
           case SDLK_r:
-            hot_reload();
-            init_ptr(&plug);
+            /* hot_reload(); */
+            /* init_ptr(&plug); */
+            pause=true;
+            populate_grid_with_random_cells_ptr();
+            next_frame();
             break;
 
           case SDLK_SPACE:
@@ -158,19 +174,19 @@ int main(int argc, char* argv[]) {
             clear_grid_ptr();
             next_frame();
             break;
+
+          case SDLK_1:
+            pause = true;
+            populate_grid_with_oscillators_ptr();
+            next_frame();
+            break;
+
+          case SDLK_2:
+            pause = true;
+            populate_grid_with_glider_gun_ptr();
+            next_frame();
+            break;
         }
-
-
-       /*
-       ** REQUIREMENTS:
-       ** When i press space bar, the animation should pause
-       ** when i press 'c', the grid should clear and then pause
-       ** after pausing, when i press 'n', the next frame should be rendered
-       ** when the screen in pause, the user should be able to draw on the screen
-        */
-
-
-
       }
 
       if(e.type == SDL_MOUSEBUTTONDOWN) {
@@ -184,8 +200,6 @@ int main(int argc, char* argv[]) {
 
           toggle_cell_state_ptr(&plug, x, y);
           SDL_UpdateWindowSurface(plug.global_window);
-
-          printf("%d %d\n", x, y);
         }
       }
 

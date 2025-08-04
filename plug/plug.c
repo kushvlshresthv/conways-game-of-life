@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "patterns.h"
+#include <stdbool.h>
 
 
 //forward declarations:
@@ -29,10 +30,25 @@ void init(Plug *plug) {
 
     populate_array_randomly(cells, rows, columns);
     /* populate_with_glider(cells, rows, columns, 20, 5); */
+    /* populate_with_all_oscillators(cells, rows, columns); */
+    /* populate_with_glider_gun(cells, rows, columns); */
 }
 
 void clear_grid() {
     memset(cells, 0, rows * columns * sizeof(int));
+}
+
+
+void populate_grid_with_oscillators() {
+    populate_with_all_oscillators(cells, rows,columns);
+}
+
+void populate_grid_with_glider_gun() {
+    populate_with_glider_gun(cells, rows, columns);
+}
+
+void populate_grid_with_random_cells() {
+    populate_array_randomly(cells, rows, columns);
 }
 
 
