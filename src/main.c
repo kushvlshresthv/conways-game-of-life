@@ -36,6 +36,9 @@ void close() {
   SDL_Quit();
 }
 
+
+
+
 /* //global variables */
 void (*init_ptr)(Plug *);
 void (*update_ptr)(Plug *);
@@ -131,8 +134,6 @@ int main(int argc, char* argv[]) {
     update_ptr(&plug);
     SDL_UpdateWindowSurface(plug.global_window);
   }
-
-
 
   close();
   return 0;
