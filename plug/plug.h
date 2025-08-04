@@ -14,6 +14,8 @@
 #define COLOR_GREY 0x4a4a50
 #define COLOR_BLACK 0x000000
 #define COLOR_WHITE  0xffffff
+#define GRADIENT_TOP_COLOR 0x7b42f5
+#define GRADIENT_BOTTOM_COLOR 0xfa70fa
 
 
 

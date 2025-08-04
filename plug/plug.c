@@ -71,6 +71,43 @@ void update(Plug *plug) {
 }
 
 
+Uint8 lerp(Uint8 a, Uint8 b, float t) {
+    return a + (b - a) * t;
+}
+
+Uint32 color_lerp(float t, SDL_PixelFormat* format) {
+    Uint8 r1 = (GRADIENT_TOP_COLOR >> 16) & 0xFF;
+    Uint8 g1 = (GRADIENT_TOP_COLOR >> 8) & 0xFF;
+    Uint8 b1 = GRADIENT_TOP_COLOR& 0xFF;
+
+    Uint8 r2 = (GRADIENT_BOTTOM_COLOR >> 16) & 0xFF;
+    Uint8 g2 = (GRADIENT_BOTTOM_COLOR >> 8) & 0xFF;
+    Uint8 b2 = GRADIENT_BOTTOM_COLOR & 0xFF;
+
+    Uint8 r = lerp(r1, r2, t);
+    Uint8 g = lerp(g1, g2, t);
+    Uint8 b = lerp(b1, b2, t);
+
+    return SDL_MapRGB(format, r, g, b);
+}
+
+// Draw a rectangle with a vertical gradient based on its position in the window
+void draw_rect_with_window_gradient(SDL_Surface* surface, SDL_Rect rect) {
+    for (int y = 0; y < rect.h; y++) {
+        int window_y = rect.y + y;
+        float t = (float)window_y / surface->h;
+
+        Uint32 pixel_color = color_lerp(t, surface->format);
+
+        for (int x = 0; x < rect.w; x++) {
+            SDL_Rect pixel_rect = { rect.x + x, rect.y + y, 1, 1 };
+            SDL_FillRect(surface, &pixel_rect, pixel_color);
+        }
+    }
+}
+
+
+
 
 //takes the top corner of the cell and constructs
 void draw_cell(SDL_Surface* surface, int cell_x, int cell_y, Uint32 color) {
@@ -78,7 +115,9 @@ void draw_cell(SDL_Surface* surface, int cell_x, int cell_y, Uint32 color) {
     float pixel_y = cell_y * CELL_WIDTH;
 
     SDL_Rect cell =(SDL_Rect){ pixel_x, pixel_y, CELL_WIDTH, CELL_WIDTH };
-    SDL_FillRect(surface, &cell ,color);
+    /* SDL_FillRect(surface, &cell ,color); */
+
+    draw_rect_with_window_gradient(surface, cell);
 }
 
 
@@ -92,7 +131,7 @@ void toggle_cell_state(Plug *plug, int cell_x, int cell_y) {
         cells[cell_x*columns + cell_y] = 0;
     }
     else {
-        SDL_FillRect(plug->global_surface, &cell ,COLOR_WHITE);
+        draw_rect_with_window_gradient(plug->global_surface, cell);
         cells[cell_y*columns + cell_x] = 1;
     }
 
