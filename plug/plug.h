@@ -4,17 +4,16 @@
 
 
 //game constants:
-#define WINDOW_WIDTH 902
-#define WINDOW_HEIGHT 902
-#define CELL_WIDTH (30/1.5) //NOTE: the CELL_WIDTH should be chosen carefully
+#define WINDOW_WIDTH (CELL_WIDTH*120 + 1)   //this means 50 columns
+#define WINDOW_HEIGHT (CELL_WIDTH*70 + 1)  //this means 50 rows
+#define CELL_WIDTH 10 //NOTE: the CELL_WIDTH should be chosen carefully
 #define GRID_THICKNESS 1
 
 
 //colors:
-#define COLOR_GREY 0x808080
+#define COLOR_GREY 0x4a4a50
 #define COLOR_BLACK 0x000000
 #define COLOR_WHITE  0xffffff
-
 
 
 

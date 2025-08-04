@@ -1,6 +1,7 @@
 #include "plug.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "patterns.h"
 
 
 //forward declarations:
@@ -17,46 +18,27 @@ int *cells;
 int *empty_cells;
 
 
-void populate_with_glider(int *array, int rows, int columns, int start_row, int start_col) {
-    // 1. First, clear the entire board by setting all cells to 0 (dead).
-    memset(array, 0, rows * columns * sizeof(int));
+Uint32 frame_start_time;
+Uint32 FRAME_DELAY = 200;
 
-    // 2. Check if the glider can fit without going out of bounds.
-    // The pattern is 3x3, so we need at least 3 cells of space.
-    if (start_row + 2 >= rows || start_col + 2 >= columns) {
-        printf("Warning: Glider starting position is too close to the edge. Board is empty.\n");
-        return;
-    }
-
-    // 3. Define the 5 live cells of the Glider pattern relative to the start position.
-    // The pattern looks like this:
-    //   . X .
-    //   . . X
-    //   X X X
-    // Where 'X' is a live cell (1) and '.' is a dead cell (0).
-
-    array[(start_row + 0) * columns + (start_col + 1)] = 1; // Top middle
-    array[(start_row + 1) * columns + (start_col + 2)] = 1; // Middle right
-    array[(start_row + 2) * columns + (start_col + 0)] = 1; // Bottom left
-    array[(start_row + 2) * columns + (start_col + 1)] = 1; // Bottom middle
-    array[(start_row + 2) * columns + (start_col + 2)] = 1; // Bottom right
-}
 
 void init(Plug *plug) {
     cells= malloc(rows * columns * sizeof(int));
     empty_cells= malloc(rows * columns * sizeof(int));
     if (cells == NULL || empty_cells == NULL) printf("Memory Allocation Failed, Handle It");
 
-    /* populate_array_randomly(cells, rows, columns); */
-    populate_with_glider(cells, rows, columns, 5, 5);
+    populate_array_randomly(cells, rows, columns);
+    /* populate_with_glider(cells, rows, columns, 20, 5); */
+}
+
+void clear_grid() {
+    memset(cells, 0, rows * columns * sizeof(int));
 }
 
 
-void update(Plug *plug) {
-    SDL_Delay(500);
-    next_frame_cells();
-    generate_pattern_from_matrix(plug->global_surface, rows, columns);
 
+
+void draw_grid(Plug *plug) {
     //render horizontal lines
     for(int i = 0; i*CELL_WIDTH < WINDOW_HEIGHT; i++) {
         SDL_FillRect(plug->global_surface, &(SDL_Rect){0,i*CELL_WIDTH,  WINDOW_WIDTH, GRID_THICKNESS}, COLOR_GREY);
@@ -65,6 +47,26 @@ void update(Plug *plug) {
     //render te vertical lines
     for(int i = 0; i*CELL_WIDTH < WINDOW_WIDTH; i++) {
         SDL_FillRect(plug->global_surface, &(SDL_Rect){i*CELL_WIDTH,0,  GRID_THICKNESS,WINDOW_HEIGHT}, COLOR_GREY);
+    }
+}
+
+
+
+
+void update(Plug *plug) {
+
+    frame_start_time = SDL_GetTicks();
+
+    next_frame_cells();
+    generate_pattern_from_matrix(plug->global_surface, rows, columns);
+    draw_grid(plug);
+
+    Uint32 frame_time = SDL_GetTicks() - frame_start_time;
+
+    // 4. If frame time is less than the target delay, wait
+    if (FRAME_DELAY > frame_time) {
+        // 5. Delay for the remaining time to achieve the target FPS
+        SDL_Delay(FRAME_DELAY - frame_time);
     }
 }
 
@@ -80,15 +82,24 @@ void draw_cell(SDL_Surface* surface, int cell_x, int cell_y, Uint32 color) {
 }
 
 
+void toggle_cell_state(Plug *plug, int cell_x, int cell_y) {
+    float pixel_x = cell_x * CELL_WIDTH;
+    float pixel_y = cell_y * CELL_WIDTH;
 
-//populates the cells with either 1 or 0 randomly
-void populate_array_randomly(int *array, int rows, int columns) {
-    for(int i = 0; i < rows; i++) {
-        for(int j = 0; j <columns; j++) {
-            array[i*columns + j] = rand() % 2;
-        }
+    SDL_Rect cell =(SDL_Rect){ pixel_x, pixel_y, CELL_WIDTH, CELL_WIDTH };
+    if(cells[cell_y*columns + cell_x] == 1) {
+        SDL_FillRect(plug->global_surface, &cell, COLOR_BLACK );
+        cells[cell_x*columns + cell_y] = 0;
     }
+    else {
+        SDL_FillRect(plug->global_surface, &cell ,COLOR_WHITE);
+        cells[cell_y*columns + cell_x] = 1;
+    }
+
+    draw_grid(plug);
 }
+
+
 
 
 //colors the cells base on the its state
@@ -96,9 +107,10 @@ void generate_pattern_from_matrix(SDL_Surface* surface, int rows, int columns) {
     for(int i = 0; i < rows; i++) {
         for(int j = 0; j < columns; j++) {
             if(cells[i*columns + j] == 1) {
-                draw_cell(surface, i, j, COLOR_WHITE);
+                draw_cell(surface, j, i, COLOR_WHITE);
             } else {
-                draw_cell(surface, i, j, COLOR_BLACK);
+                //The background is already black
+                /* draw_cell(surface, j, i, COLOR_BLACK); */
             }
         }
     }
@@ -137,13 +149,16 @@ int count_neighbours(int i, int j) {
 }
 
 
+
+
+
+
 //calculates the cell states for the next frame
 void next_frame_cells() {
     for(int i = 0; i<rows; i++) {
         for(int j = 0; j< columns; j++) {
             int neighbour_count = count_neighbours(i, j);
 
-            printf("neighbour_count = %d\n", neighbour_count);
             //rule 1: a live cell with fewer than 2 live neighbours dies
             if(neighbour_count < 2) {
                 empty_cells[i*columns + j] = 0;
@@ -168,8 +183,6 @@ void next_frame_cells() {
                 empty_cells[i*columns + j] = 0;
                 continue;
             }
-
-
         }
     }
     int *temp = cells;
