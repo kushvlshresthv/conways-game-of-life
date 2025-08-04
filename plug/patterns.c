@@ -123,32 +123,22 @@ void populate_with_all_oscillators(int *array, int rows, int columns) {
 
 
 //GLIDER GUN:
-//
-//
+
 void populate_with_glider_gun(int *array, int rows, int columns) {
-    // 1. First, clear the entire board by setting all cells to 0 (dead).
     memset(array, 0, rows * columns * sizeof(int));
 
-    // Define the dimensions of the Glider Gun pattern.
     const int gun_height = 9;
     const int gun_width = 36;
 
-    // 2. Calculate the starting position to center the gun.
-    // Integer division will handle centering automatically.
     int start_row = (rows - gun_height) / 2.9;
     int start_col = (columns - gun_width) / 2;
 
-    // 3. Check if the gun can fit on the board.
     if (start_row < 0 || start_col < 0 || start_row + gun_height >= rows || start_col + gun_width >= columns) {
         printf("Warning: Board is too small to fit the Glider Gun. Board is empty.\n");
         return;
     }
 
-    // 4. Define the 36 live cells of the Glider Gun pattern.
-    // The coordinates are relative to the top-left of the pattern's bounding box.
-    // We'll set the corresponding cells in the main array to 1 (alive).
-
-    // Left Square (2x2 block)
+   // Left Square (2x2 block)
     array[(start_row + 4) * columns + (start_col + 0)] = 1;
     array[(start_row + 5) * columns + (start_col + 0)] = 1;
     array[(start_row + 4) * columns + (start_col + 1)] = 1;
